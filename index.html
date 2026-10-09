@@ -3,55 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Čau</title>
+    <title>Ultimate Pro Calculator v2</title>
     <style>
         :root {
-            /* Light Theme */
-            --bg-body: #f8f9fa;
+            --bg-body: #f4f4f7;
             --bg-calc: #ffffff;
-            --text-main: #1d1d1f;
+            --text-main: #1d1d1f; /* Hlavní tmavý text pro light mode */
+            --text-secondary: rgba(0, 0, 0, 0.5); /* Vedlejší text */
             --display-bg: #f2f2f7;
             --btn-num: #ffffff;
             --btn-op: #e5e5ea;
             --btn-sci: #f2f2f7;
             --btn-accent: #007aff;
-            --accent-glow: rgba(0, 122, 255, 0.3);
             --history-bg: rgba(255, 255, 255, 0.7);
-            --shadow: 0 30px 60px rgba(0,0,0,0.12);
+            --shadow: 0 30px 60px rgba(0,0,0,0.1);
         }
 
         [data-theme="dark"] {
-            --bg-body: #0a0a0a;
+            --bg-body: #000000;
             --bg-calc: #1c1c1e;
-            --text-main: #ffffff;
+            --text-main: #ffffff; /* Čistě bílý text pro dark mode */
+            --text-secondary: rgba(255, 255, 255, 0.5); /* Světlý vedlejší text */
             --display-bg: #2c2c2e;
             --btn-num: #3a3a3c;
             --btn-op: #48484a;
             --btn-sci: #2c2c2e;
             --history-bg: rgba(28, 28, 30, 0.8);
-            --shadow: 0 30px 60px rgba(0,0,0,0.45);
+            --shadow: 0 30px 60px rgba(0,0,0,0.4);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease; }
 
         body {
             background-color: var(--bg-body);
+            color: var(--text-main); /* Zajišťuje, že veškerý text defaultně bere barvu tématu */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
             padding: 20px;
         }
 
-        /* PŘEPÍNAČ TÉMATU V ROHU */
+        /* PŘEPÍNAČ TÉMATU */
         .theme-toggle {
             position: fixed;
             top: 25px;
             right: 25px;
             z-index: 1000;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: var(--bg-calc);
             border: 1px solid var(--btn-op);
@@ -59,44 +59,30 @@
             font-size: 1.2rem;
             display: flex; align-items: center; justify-content: center;
             box-shadow: var(--shadow);
+            color: var(--text-main);
         }
 
-        /* HLAVNÍ KONTEJNER APLIKACE */
-        .app-container {
-            display: flex;
-            gap: 20px;
-            max-width: 1000px;
-            align-items: flex-start;
-        }
+        .app-container { display: flex; gap: 24px; align-items: flex-start; max-width: 1000px; }
 
         /* HISTORIE */
         .history-panel {
-            width: 240px;
-            height: 580px;
+            width: 260px;
+            height: 620px;
             background: var(--history-bg);
             backdrop-filter: blur(20px);
             border-radius: 30px;
-            padding: 20px;
+            padding: 24px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
+            color: var(--text-main); /* Nadpis Historie bude nyní bílý */
         }
 
-        .history-list {
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        .history-item {
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(128,128,128,0.1);
-        }
-
+        .history-list { overflow-y: auto; flex-grow: 1; margin-top: 15px; }
+        .history-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; border-bottom: 1px solid var(--btn-op); }
         .history-item:hover { background: rgba(0, 122, 255, 0.1); }
-        .history-val { font-weight: 700; color: var(--btn-accent); display: block; }
+        .history-expr { font-size: 0.8rem; color: var(--text-secondary); }
+        .history-val { font-weight: 700; color: var(--btn-accent); display: block; font-size: 1.1rem; }
 
         /* KALKULAČKA */
         .calculator {
@@ -106,32 +92,8 @@
             border-radius: 35px;
             box-shadow: var(--shadow);
             position: relative;
-            z-index: 2;
         }
 
-        /* VĚDECKÝ PANEL (VYSOUVACÍ) */
-        .sci-panel {
-            background: var(--btn-sci);
-            width: 0;
-            height: 500px;
-            border-radius: 30px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            overflow: hidden;
-            opacity: 0;
-            padding: 0;
-            align-self: center;
-        }
-
-        .sci-panel.open {
-            width: 180px;
-            opacity: 1;
-            padding: 15px;
-            margin-left: 15px;
-        }
-
-        /* DISPLEJ */
         .display {
             background: var(--display-bg);
             padding: 30px 20px;
@@ -141,63 +103,52 @@
             cursor: pointer;
             position: relative;
         }
-
+        
         .display:active { transform: scale(0.98); }
         
-        .copy-tooltip {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--btn-accent);
-            color: white;
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 10px;
-            opacity: 0;
-        }
-
-        #display-main {
-            font-size: 2.8rem;
-            font-weight: 600;
-            color: var(--text-main);
-            letter-spacing: -1px;
-            white-space: nowrap;
-            overflow: hidden;
-        }
+        #display-history { font-size: 0.85rem; color: var(--text-secondary); min-height: 1.2em; margin-bottom: 4px; }
+        #display-main { font-size: 2.8rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; }
 
         /* TLAČÍTKA */
-        .buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
+        .buttons-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         button {
             height: 62px;
             border-radius: 18px;
             border: none;
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 500;
             cursor: pointer;
             background: var(--btn-num);
             color: var(--text-main);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
-
-        button:hover { filter: brightness(0.95); transform: translateY(-2px); }
-        button:active { transform: translateY(0); }
-
+        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
         .op { background: var(--btn-op); color: var(--btn-accent); font-weight: 700; }
-        .sci-btn { font-size: 0.9rem; background: var(--btn-num); font-weight: 600; }
-        .equal { background: var(--btn-accent); color: white; box-shadow: 0 8px 20px var(--accent-glow); }
+        .sci-btn { font-size: 1rem; background: var(--btn-sci); color: var(--text-main); }
+        .equal { background: var(--btn-accent); color: white; grid-column: span 2; }
         .clear { color: #ff3b30; }
 
-        @media (max-width: 850px) {
-            body { overflow-y: auto; padding-top: 80px; }
-            .app-container { flex-direction: column; align-items: center; }
-            .history-panel { width: 350px; height: 200px; order: 3; }
-            .sci-panel.open { width: 350px; height: auto; margin: 10px 0; order: 2; grid-template-columns: repeat(4, 1fr); }
+        /* SCI PANEL ANIMACE */
+        .sci-panel {
+            background: var(--btn-sci);
+            width: 0; opacity: 0; overflow: hidden;
+            border-radius: 30px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            align-self: stretch; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .sci-panel.open { width: 180px; opacity: 1; padding: 15px; margin-left: 15px; }
+
+        .copy-hint {
+            position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+            background: var(--btn-accent); color: white; padding: 6px 12px;
+            border-radius: 10px; font-size: 0.8rem; opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .copy-hint.show { opacity: 1; top: -10px; }
+
+        /* Mobilní verze */
+        @media (max-width: 800px) {
+            .app-container { flex-direction: column; align-items: center; padding-top: 60px; }
+            .history-panel { width: 350px; height: 180px; order: 3; }
+            .sci-panel.open { width: 350px; margin: 15px 0; order: 2; grid-template-columns: repeat(4, 1fr); }
         }
     </style>
 </head>
@@ -208,42 +159,44 @@
     <div class="app-container">
         <!-- Historie -->
         <div class="history-panel">
-            <h4 style="margin-bottom:15px; opacity: 0.5;">Historie</h4>
-            <div class="history-list" id="history-list"></div>
+            <h3 style="color: var(--text-main);">Historie</h3>
+            <div class="history-list" id="history-list">
+                <!-- Zde se objeví historie -->
+            </div>
         </div>
 
         <!-- Hlavní kalkulačka -->
         <div class="calculator">
             <div class="display" onclick="copyResult()">
-                <div class="copy-tooltip" id="copy-tip">Kopírováno!</div>
-                <div id="display-history" style="font-size: 0.8rem; opacity: 0.5; min-height: 1em;"></div>
+                <div class="copy-hint" id="copy-hint">Zkopírováno!</div>
+                <div id="display-history"></div>
                 <div id="display-main">0</div>
             </div>
 
             <div class="buttons-grid">
                 <button class="op clear" onclick="fullClear()">AC</button>
                 <button class="op" onclick="deleteLast()">⌫</button>
-                <button class="op" onclick="toggleScientific()">Sci</button>
-                <button class="op" onclick="appendOperator('/')">÷</button>
+                <button class="op" onclick="toggleSci()">Sci</button>
+                <button class="op" onclick="appendOp('/')">÷</button>
 
-                <button onclick="appendNumber('7')">7</button>
-                <button onclick="appendNumber('8')">8</button>
-                <button onclick="appendNumber('9')">9</button>
-                <button class="op" onclick="appendOperator('*')">×</button>
+                <button onclick="appendNum('7')">7</button>
+                <button onclick="appendNum('8')">8</button>
+                <button onclick="appendNum('9')">9</button>
+                <button class="op" onclick="appendOp('*')">×</button>
 
-                <button onclick="appendNumber('4')">4</button>
-                <button onclick="appendNumber('5')">5</button>
-                <button onclick="appendNumber('6')">6</button>
-                <button class="op" onclick="appendOperator('-')">−</button>
+                <button onclick="appendNum('4')">4</button>
+                <button onclick="appendNum('5')">5</button>
+                <button onclick="appendNum('6')">6</button>
+                <button class="op" onclick="appendOp('-')">−</button>
 
-                <button onclick="appendNumber('1')">1</button>
-                <button onclick="appendNumber('2')">2</button>
-                <button onclick="appendNumber('3')">3</button>
-                <button class="op" onclick="appendOperator('+')">+</button>
+                <button onclick="appendNum('1')">1</button>
+                <button onclick="appendNum('2')">2</button>
+                <button onclick="appendNum('3')">3</button>
+                <button class="op" onclick="appendOp('+')">+</button>
 
-                <button onclick="appendNumber('0')">0</button>
-                <button onclick="appendNumber('.')">.</button>
-                <button class="equal" style="grid-column: span 2;" onclick="calculate()">=</button>
+                <button onclick="appendNum('0')">0</button>
+                <button onclick="appendNum('.')">.</button>
+                <button class="equal" onclick="calculate()">=</button>
             </div>
         </div>
 
@@ -253,162 +206,130 @@
             <button class="sci-btn" onclick="sciFunc('cos')">cos</button>
             <button class="sci-btn" onclick="sciFunc('tan')">tan</button>
             <button class="sci-btn" onclick="sciFunc('log')">log</button>
-            <button class="sci-btn" onclick="sciFunc('pow')">xʸ</button>
+            <button class="sci-btn" onclick="appendNum(Math.PI.toFixed(5))">π</button>
             <button class="sci-btn" onclick="sciFunc('sqrt')">√x</button>
+            <button class="sci-btn" onclick="sciFunc('pow2')">x²</button>
             <button class="sci-btn" onclick="sciFunc('fact')">n!</button>
-            <button class="sci-btn" onclick="appendNumber(Math.PI.toFixed(4))">π</button>
-            <button class="sci-btn" onclick="sciFunc('exp')">eˣ</button>
-            <button class="sci-btn" onclick="sciFunc('abs')">|x|</button>
         </div>
     </div>
 
     <script>
-        let currentInput = '0';
-        let previousInput = '';
+        let current = '0';
+        let prev = '';
         let operator = null;
         let shouldReset = false;
-        let history = JSON.parse(localStorage.getItem('calcHistory')) || [];
+        let history = JSON.parse(localStorage.getItem('calc_hist')) || [];
 
-        // Oddělovač tisíců (1 234 567)
-        function formatDisplay(numStr) {
-            if (numStr === "Chyba") return numStr;
-            let parts = numStr.toString().split(".");
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            return parts.join(".");
+        const dMain = document.getElementById('display-main');
+        const dHist = document.getElementById('display-history');
+
+        function format(val) {
+            if (val === "Chyba") return val;
+            let [int, dec] = val.toString().split(".");
+            int = int.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            return dec ? `${int}.${dec}` : int;
         }
 
-        function updateDisplay() {
-            const display = document.getElementById('display-main');
-            display.innerText = formatDisplay(currentInput);
-            // Zmenšení písma u dlouhých čísel
-            display.style.fontSize = currentInput.length > 10 ? '1.8rem' : '2.8rem';
+        function update() {
+            dMain.innerText = format(current);
+            dMain.style.fontSize = current.length > 10 ? '1.8rem' : '2.8rem';
         }
 
-        function appendNumber(num) {
-            if (currentInput === '0' || shouldReset) {
-                currentInput = num.toString();
-                shouldReset = false;
-            } else {
-                if (num === '.' && currentInput.includes('.')) return;
-                currentInput += num;
-            }
-            updateDisplay();
+        function appendNum(n) {
+            if (current === '0' || shouldReset) { current = n; shouldReset = false; }
+            else { if (n === '.' && current.includes('.')) return; current += n; }
+            update();
         }
 
-        function appendOperator(op) {
-            if (operator !== null) calculate();
-            previousInput = currentInput;
+        function appendOp(op) {
+            if (operator) calculate();
+            prev = current;
             operator = op;
-            document.getElementById('display-history').innerText = `${formatDisplay(previousInput)} ${op}`;
+            dHist.innerText = `${format(prev)} ${op}`;
             shouldReset = true;
         }
 
         function calculate() {
-            if (operator === null || shouldReset) return;
+            if (!operator || shouldReset) return;
             let result;
-            const prev = parseFloat(previousInput);
-            const current = parseFloat(currentInput);
-
-            switch (operator) {
-                case '+': result = prev + current; break;
-                case '-': result = prev - current; break;
-                case '*': result = prev * current; break;
-                case '/': result = current === 0 ? "Chyba" : prev / current; break;
-            }
-
-            if (typeof result === 'number') result = Math.round(result * 10000000) / 10000000;
+            const p = parseFloat(prev);
+            const c = parseFloat(current);
             
-            addToHistory(`${previousInput} ${operator} ${currentInput}`, result);
-            currentInput = result.toString();
+            switch(operator) {
+                case '+': result = p + c; break;
+                case '-': result = p - c; break;
+                case '*': result = p * c; break;
+                case '/': result = c === 0 ? "Chyba" : p / c; break;
+            }
+            
+            if (typeof result === 'number') result = Math.round(result * 1000000) / 1000000;
+            
+            addHist(`${prev} ${operator} ${current}`, result);
+            current = result.toString();
             operator = null;
             shouldReset = true;
-            document.getElementById('display-history').innerText = "";
-            updateDisplay();
+            dHist.innerText = '';
+            update();
         }
 
-        function sciFunc(type) {
-            let val = parseFloat(currentInput);
-            let res = 0;
-            switch(type) {
-                case 'sin': res = Math.sin(val * Math.PI / 180); break;
-                case 'cos': res = Math.cos(val * Math.PI / 180); break;
-                case 'tan': res = Math.tan(val * Math.PI / 180); break;
-                case 'log': res = Math.log10(val); break;
-                case 'sqrt': res = Math.sqrt(val); break;
-                case 'exp': res = Math.exp(val); break;
-                case 'abs': res = Math.abs(val); break;
-                case 'fact':
-                    res = 1;
-                    for (let i = 2; i <= val; i++) res *= i;
-                    break;
-                case 'pow':
-                    appendOperator('**'); 
-                    return;
-            }
-            currentInput = Math.round(res * 10000000) / 10000000 + "";
-            updateDisplay();
+        function sciFunc(f) {
+            let v = parseFloat(current);
+            let r = 0;
+            if (f === 'sin') r = Math.sin(v * Math.PI / 180);
+            if (f === 'cos') r = Math.cos(v * Math.PI / 180);
+            if (f === 'tan') r = Math.tan(v * Math.PI / 180);
+            if (f === 'log') r = Math.log10(v);
+            if (f === 'sqrt') r = Math.sqrt(v);
+            if (f === 'pow2') r = v * v;
+            if (f === 'fact') { r = 1; for(let i=2; i<=v; i++) r *= i; }
+            
+            current = (Math.round(r * 1000000) / 1000000).toString();
+            update();
         }
 
-        function fullClear() {
-            currentInput = '0';
-            previousInput = '';
-            operator = null;
-            document.getElementById('display-history').innerText = "";
-            updateDisplay();
-        }
-
+        function fullClear() { current = '0'; prev = ''; operator = null; dHist.innerText = ''; update(); }
+        
         function deleteLast() {
-            currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : '0';
-            updateDisplay();
+            current = current.length > 1 ? current.slice(0, -1) : '0';
+            update();
         }
 
-        // Kopírování výsledku
+        function toggleSci() { document.getElementById('sci-panel').classList.toggle('open'); }
+
         function copyResult() {
-            navigator.clipboard.writeText(currentInput);
-            const tip = document.getElementById('copy-tip');
-            tip.style.opacity = '1';
-            setTimeout(() => tip.style.opacity = '0', 1500);
+            navigator.clipboard.writeText(current);
+            const hint = document.getElementById('copy-hint');
+            hint.classList.add('show');
+            setTimeout(() => hint.classList.remove('show'), 2000);
         }
 
-        // Přepínač Vědeckého módu
-        function toggleScientific() {
-            document.getElementById('sci-panel').classList.toggle('open');
-        }
-
-        function addToHistory(expr, res) {
-            if (res === "Chyba") return;
-            history.unshift({ expr, res });
+        function addHist(ex, rs) {
+            if (rs === "Chyba") return;
+            history.unshift({ex, rs});
             if (history.length > 10) history.pop();
-            localStorage.setItem('calcHistory', JSON.stringify(history));
-            renderHistory();
+            localStorage.setItem('calc_hist', JSON.stringify(history));
+            renderHist();
         }
 
-        function renderHistory() {
-            const container = document.getElementById('history-list');
-            container.innerHTML = history.map(item => `
-                <div class="history-item" onclick="useHistory('${item.res}')">
-                    <small style="opacity:0.5">${item.expr} =</small>
-                    <span class="history-val">${formatDisplay(item.res)}</span>
+        function renderHist() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = history.map(i => `
+                <div class="history-item" onclick="current='${i.rs}'; update();">
+                    <span class="history-expr">${i.ex} =</span>
+                    <span class="history-val">${format(i.rs)}</span>
                 </div>
             `).join('');
         }
 
-        function useHistory(val) {
-            currentInput = val;
-            updateDisplay();
-        }
-
         function toggleTheme() {
             const body = document.body;
-            const icon = document.getElementById('themeIcon');
             const isDark = body.getAttribute('data-theme') === 'dark';
             body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            icon.innerText = isDark ? '🌙' : '☀️';
+            document.getElementById('themeIcon').innerText = isDark ? '🌙' : '☀️';
         }
 
-        // Inicializace
-        renderHistory();
-        updateDisplay();
+        renderHist();
+        update();
     </script>
 </body>
 </html>
