@@ -3,38 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moderní Kalkulačka</title>
+    <title>Pro Kalkulačka s Historií</title>
     <style>
-        /* CSS PROMĚNNÉ PRO LIGHT/DARK MODE */
         :root {
-            --bg-body: #f4f4f9;
+            --bg-body: #f0f2f5;
             --bg-calc: #ffffff;
-            --text-main: #2d3436;
-            --display-bg: #f8f9fa;
-            --btn-num: #f1f2f6;
-            --btn-op: #dfe4ea;
-            --btn-accent: #6c5ce7;
-            --btn-accent-hover: #a29bfe;
-            --shadow: 0 10px 25px rgba(0,0,0,0.05);
+            --text-main: #1d1d1f;
+            --display-bg: #f5f5f7;
+            --btn-num: #ffffff;
+            --btn-op: #e5e5ea;
+            --btn-spec: #d1d1d6;
+            --btn-accent: #007aff;
+            --history-bg: rgba(255, 255, 255, 0.7);
+            --shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
         [data-theme="dark"] {
-            --bg-body: #121212;
-            --bg-calc: #1e1e1e;
-            --text-main: #f5f6fa;
-            --display-bg: #2d3436;
-            --btn-num: #333333;
-            --btn-op: #444444;
-            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+            --bg-body: #000000;
+            --bg-calc: #1c1c1e;
+            --text-main: #ffffff;
+            --display-bg: #2c2c2e;
+            --btn-num: #3a3a3c;
+            --btn-op: #48484a;
+            --btn-spec: #636366;
+            --history-bg: rgba(28, 28, 30, 0.8);
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
-            transition: all 0.3s ease;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.3s, color 0.3s; }
 
         body {
             background-color: var(--bg-body);
@@ -42,61 +38,89 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        /* HLAVNÍ KONTEJNER */
+        /* DARK MODE TOGGLE V ROHU */
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: var(--bg-calc);
+            border: 1px solid var(--btn-op);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* HISTORIE PANEL */
+        .history-panel {
+            width: 250px;
+            height: 520px;
+            background: var(--history-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-panel h3 {
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-size: 1rem;
+            opacity: 0.6;
+        }
+
+        #history-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--btn-op);
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        .history-item:hover { background: rgba(0,0,0,0.05); }
+        .history-item .result { display: block; font-weight: bold; font-size: 1rem; color: var(--btn-accent); }
+
+        /* KALKULAČKA */
         .calculator {
             background-color: var(--bg-calc);
-            width: 340px;
-            padding: 25px;
-            border-radius: 30px;
+            width: 360px;
+            padding: 24px;
+            border-radius: 32px;
             box-shadow: var(--shadow);
-            position: relative;
         }
 
-        /* PŘEPÍNAČ TÉMAT */
-        .theme-toggle {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.2rem;
-            opacity: 0.7;
-        }
-
-        /* DISPLEJ */
         .display {
             width: 100%;
             background: var(--display-bg);
-            margin-top: 40px;
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-bottom: 24px;
+            padding: 25px;
             text-align: right;
             border-radius: 20px;
-            min-height: 100px;
+            min-height: 110px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            word-wrap: break-word;
-            word-break: break-all;
         }
 
-        .display-history {
-            font-size: 0.9rem;
-            color: #888;
-            margin-bottom: 5px;
-        }
+        #display-history { font-size: 0.9rem; color: #8e8e93; min-height: 1.2rem; margin-bottom: 5px; }
+        #display-main { font-size: 2.5rem; font-weight: 500; color: var(--text-main); overflow: hidden; }
 
-        .display-main {
-            font-size: 2.2rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        /* TLAČÍTKA */
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -105,149 +129,154 @@
 
         button {
             border: none;
-            height: 65px;
-            border-radius: 18px;
-            font-size: 1.3rem;
+            height: 60px;
+            border-radius: 16px;
+            font-size: 1.2rem;
             font-weight: 500;
             cursor: pointer;
             color: var(--text-main);
             background-color: var(--btn-num);
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        button:active {
-            transform: scale(0.95);
-        }
+        button:active { transform: scale(0.95); }
+        button.op { background-color: var(--btn-op); color: var(--btn-accent); font-weight: 600; }
+        button.spec { background-color: var(--btn-spec); font-size: 1rem; }
+        button.equal { background-color: var(--btn-accent); color: white; grid-column: span 1; }
+        button.clear { color: #ff3b30; }
 
-        button.operator {
-            background-color: var(--btn-op);
-            color: var(--btn-accent);
-            font-weight: 700;
+        /* Mobilní optimalizace */
+        @media (max-width: 600px) {
+            body { flex-direction: column; padding: 60px 10px 10px 10px; }
+            .history-panel { width: 100%; height: 150px; order: 2; }
+            .calculator { width: 100%; order: 1; }
         }
-
-        button.equal {
-            background-color: var(--btn-accent);
-            color: #fff;
-            grid-column: span 2;
-        }
-
-        button.equal:hover {
-            background-color: var(--btn-accent-hover);
-        }
-
-        button.clear {
-            color: #ff7675;
-        }
-
     </style>
 </head>
 <body data-theme="dark">
 
+    <button class="theme-switch" onclick="toggleTheme()" id="themeIcon">☀️</button>
+
+    <div class="history-panel">
+        <h3>Historie (posledních 10)</h3>
+        <ul id="history-list"></ul>
+    </div>
+
     <div class="calculator">
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-        
         <div class="display">
-            <div class="display-history" id="history"></div>
-            <div class="display-main" id="display">0</div>
+            <div id="display-history"></div>
+            <div id="display-main">0</div>
         </div>
 
         <div class="buttons">
-            <!-- První řada -->
-            <button class="clear operator" onclick="clearDisplay()">AC</button>
-            <button class="operator" onclick="deleteLast()">DEL</button>
-            <button class="operator" onclick="appendOperator('%')">%</button>
-            <button class="operator" onclick="appendOperator('/')">÷</button>
-            
-            <!-- Čísla -->
+            <!-- Vědecké/Speciální funkce -->
+            <button class="spec" onclick="calculateSpecial('pow2')">x²</button>
+            <button class="spec" onclick="calculateSpecial('sqrt')">√</button>
+            <button class="spec" onclick="appendNumber(Math.PI.toFixed(4))">π</button>
+            <button class="spec" onclick="calculateSpecial('sign')">±</button>
+
+            <button class="clear op" onclick="fullClear()">AC</button>
+            <button class="op" onclick="deleteLast()">DEL</button>
+            <button class="op" onclick="appendOperator('%')">%</button>
+            <button class="op" onclick="appendOperator('/')">÷</button>
+
             <button onclick="appendNumber('7')">7</button>
             <button onclick="appendNumber('8')">8</button>
             <button onclick="appendNumber('9')">9</button>
-            <button class="operator" onclick="appendOperator('*')">×</button>
-            
+            <button class="op" onclick="appendOperator('*')">×</button>
+
             <button onclick="appendNumber('4')">4</button>
             <button onclick="appendNumber('5')">5</button>
             <button onclick="appendNumber('6')">6</button>
-            <button class="operator" onclick="appendOperator('-')">−</button>
-            
+            <button class="op" onclick="appendOperator('-')">−</button>
+
             <button onclick="appendNumber('1')">1</button>
             <button onclick="appendNumber('2')">2</button>
             <button onclick="appendNumber('3')">3</button>
-            <button class="operator" onclick="appendOperator('+')">+</button>
-            
-            <button onclick="appendNumber('0')">0</button>
+            <button class="op" onclick="appendOperator('+')">+</button>
+
+            <button onclick="appendNumber('0')" style="grid-column: span 1;">0</button>
             <button onclick="appendNumber('.')">.</button>
-            <button class="equal" onclick="calculate()">=</button>
+            <button class="equal" onclick="calculate()" style="grid-column: span 2;">=</button>
         </div>
     </div>
 
     <script>
-        const displayMain = document.getElementById('display');
-        const displayHistory = document.getElementById('history');
-        const body = document.body;
-        
         let currentInput = '0';
         let previousInput = '';
         let operator = null;
-        let shouldResetDisplay = false;
+        let shouldReset = false;
+        let history = [];
 
-        // FUNKCE: Zadávání čísel
-        function appendNumber(number) {
-            if (currentInput === '0' || shouldResetDisplay) {
-                currentInput = number;
-                shouldResetDisplay = false;
+        const displayMain = document.getElementById('display-main');
+        const displayHistory = document.getElementById('display-history');
+        const historyList = document.getElementById('history-list');
+
+        function updateDisplay() {
+            displayMain.innerText = currentInput;
+        }
+
+        function appendNumber(num) {
+            if (currentInput === '0' || shouldReset) {
+                currentInput = num.toString();
+                shouldReset = false;
             } else {
-                if (number === '.' && currentInput.includes('.')) return;
-                currentInput += number;
+                if (num === '.' && currentInput.includes('.')) return;
+                currentInput += num;
             }
             updateDisplay();
         }
 
-        // FUNKCE: Operátory
         function appendOperator(op) {
             if (operator !== null) calculate();
             previousInput = currentInput;
             operator = op;
             displayHistory.innerText = `${previousInput} ${op}`;
-            shouldResetDisplay = true;
+            shouldReset = true;
         }
 
-        // FUNKCE: Výpočet
         function calculate() {
-            if (operator === null || shouldResetDisplay) return;
-            
+            if (operator === null || shouldReset) return;
             let result;
             const prev = parseFloat(previousInput);
             const current = parseFloat(currentInput);
-
-            if (isNaN(prev) || isNaN(current)) return;
 
             switch (operator) {
                 case '+': result = prev + current; break;
                 case '-': result = prev - current; break;
                 case '*': result = prev * current; break;
-                case '/': 
-                    result = current === 0 ? "Chyba" : prev / current;
-                    break;
+                case '/': result = current === 0 ? 'Chyba' : prev / current; break;
                 case '%': result = prev % current; break;
                 default: return;
             }
 
-            // Ošetření desetinných míst pro čistý vzhled
-            if (typeof result === 'number') {
-                result = Math.round(result * 100000000) / 100000000;
-            }
-
+            result = formatResult(result);
+            addToHistory(`${previousInput} ${operator} ${currentInput}`, result);
+            
             displayHistory.innerText = `${previousInput} ${operator} ${currentInput} =`;
             currentInput = result.toString();
             operator = null;
-            shouldResetDisplay = true;
+            shouldReset = true;
             updateDisplay();
         }
 
-        // FUNKCE: Mazání
-        function clearDisplay() {
+        function calculateSpecial(type) {
+            let val = parseFloat(currentInput);
+            let res;
+            switch(type) {
+                case 'pow2': res = val * val; break;
+                case 'sqrt': res = Math.sqrt(val); break;
+                case 'sign': res = val * -1; break;
+            }
+            currentInput = formatResult(res).toString();
+            updateDisplay();
+        }
+
+        function formatResult(num) {
+            if (isNaN(num)) return "Chyba";
+            return Math.round(num * 10000000) / 10000000;
+        }
+
+        function fullClear() {
             currentInput = '0';
             previousInput = '';
             operator = null;
@@ -256,41 +285,60 @@
         }
 
         function deleteLast() {
-            if (currentInput.length === 1) {
-                currentInput = '0';
-            } else {
+            if (shouldReset) {
+                displayHistory.innerText = '';
+                return;
+            }
+            if (currentInput.length > 1) {
                 currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
             }
             updateDisplay();
         }
 
-        function updateDisplay() {
-            displayMain.innerText = currentInput;
+        function addToHistory(expression, result) {
+            if (result === "Chyba") return;
+            history.unshift({ expression, result });
+            if (history.length > 10) history.pop();
+            renderHistory();
         }
 
-        // TÉMA (DARK MODE)
+        function renderHistory() {
+            historyList.innerHTML = '';
+            history.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.innerHTML = `<span>${item.expression} =</span><span class="result">${item.result}</span>`;
+                li.onclick = () => {
+                    currentInput = item.result.toString();
+                    updateDisplay();
+                };
+                historyList.appendChild(li);
+            });
+        }
+
         function toggleTheme() {
-            const currentTheme = body.getAttribute('data-theme');
-            const themeBtn = document.getElementById('themeBtn');
-            
-            if (currentTheme === 'dark') {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            if (body.getAttribute('data-theme') === 'dark') {
                 body.setAttribute('data-theme', 'light');
-                themeBtn.innerText = '🌙';
+                icon.innerText = '🌙';
             } else {
                 body.setAttribute('data-theme', 'dark');
-                themeBtn.innerText = '☀️';
+                icon.innerText = '☀️';
             }
         }
 
-        // PODPORA KLÁVESNICE
-        window.addEventListener('keydown', (e) => {
-            if (e.key >= 0 && e.key <= 9) appendNumber(e.key);
+        // Klávesnice
+        window.onkeydown = (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
             if (e.key === '.') appendNumber('.');
-            if (e.key === '=' || e.key === 'Enter') calculate();
+            if (e.key === 'Enter' || e.key === '=') calculate();
             if (e.key === 'Backspace') deleteLast();
-            if (e.key === 'Escape') clearDisplay();
+            if (e.key === 'Escape') fullClear();
             if (['+', '-', '*', '/'].includes(e.key)) appendOperator(e.key);
-        });
+        };
     </script>
 </body>
 </html>
