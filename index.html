@@ -3,333 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Pro Calculator v2</title>
+    <title>ToolBox Hub</title>
     <style>
         :root {
-            --bg-body: #f4f4f7;
-            --bg-calc: #ffffff;
-            --text-main: #1d1d1f; /* Hlavní tmavý text pro light mode */
-            --text-secondary: rgba(0, 0, 0, 0.5); /* Vedlejší text */
-            --display-bg: #f2f2f7;
-            --btn-num: #ffffff;
-            --btn-op: #e5e5ea;
-            --btn-sci: #f2f2f7;
-            --btn-accent: #007aff;
-            --history-bg: rgba(255, 255, 255, 0.7);
-            --shadow: 0 30px 60px rgba(0,0,0,0.1);
+            --bg: #f5f5f7;
+            --sidebar: #ffffff;
+            --card: #ffffff;
+            --text: #1d1d1f;
+            --text-sec: #86868b;
+            --accent: #0071e3;
+            --btn-hover: #f0f0f2;
+            --border: #d2d2d7;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         [data-theme="dark"] {
-            --bg-body: #000000;
-            --bg-calc: #1c1c1e;
-            --text-main: #ffffff; /* Čistě bílý text pro dark mode */
-            --text-secondary: rgba(255, 255, 255, 0.5); /* Světlý vedlejší text */
-            --display-bg: #2c2c2e;
-            --btn-num: #3a3a3c;
-            --btn-op: #48484a;
-            --btn-sci: #2c2c2e;
-            --history-bg: rgba(28, 28, 30, 0.8);
-            --shadow: 0 30px 60px rgba(0,0,0,0.4);
+            --bg: #121212;
+            --sidebar: #1c1c1e;
+            --card: #2c2c2e;
+            --text: #f5f5f7;
+            --text-sec: #a1a1a6;
+            --accent: #0a84ff;
+            --btn-hover: #3a3a3c;
+            --border: #48484a;
+            --shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main); /* Zajišťuje, že veškerý text defaultně bere barvu tématu */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+        body { background-color: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
 
-        /* PŘEPÍNAČ TÉMATU */
-        .theme-toggle {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            z-index: 1000;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--bg-calc);
-            border: 1px solid var(--btn-op);
-            cursor: pointer;
-            font-size: 1.2rem;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: var(--shadow);
-            color: var(--text-main);
-        }
-
-        .app-container { display: flex; gap: 24px; align-items: flex-start; max-width: 1000px; }
-
-        /* HISTORIE */
-        .history-panel {
-            width: 260px;
-            height: 620px;
-            background: var(--history-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            padding: 24px;
-            box-shadow: var(--shadow);
+        /* SIDEBAR */
+        nav {
+            width: 280px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            color: var(--text-main); /* Nadpis Historie bude nyní bílý */
+            position: fixed;
+            height: 100vh;
         }
 
-        .history-list { overflow-y: auto; flex-grow: 1; margin-top: 15px; }
-        .history-item { padding: 12px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; border-bottom: 1px solid var(--btn-op); }
-        .history-item:hover { background: rgba(0, 122, 255, 0.1); }
-        .history-expr { font-size: 0.8rem; color: var(--text-secondary); }
-        .history-val { font-weight: 700; color: var(--btn-accent); display: block; font-size: 1.1rem; }
+        .logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
 
-        /* KALKULAČKA */
-        .calculator {
-            background: var(--bg-calc);
-            width: 350px;
-            padding: 24px;
-            border-radius: 35px;
-            box-shadow: var(--shadow);
-            position: relative;
-        }
-
-        .display {
-            background: var(--display-bg);
-            padding: 30px 20px;
-            border-radius: 25px;
-            margin-bottom: 25px;
-            text-align: right;
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 12px;
             cursor: pointer;
-            position: relative;
-        }
-        
-        .display:active { transform: scale(0.98); }
-        
-        #display-history { font-size: 0.85rem; color: var(--text-secondary); min-height: 1.2em; margin-bottom: 4px; }
-        #display-main { font-size: 2.8rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; }
-
-        /* TLAČÍTKA */
-        .buttons-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button {
-            height: 62px;
-            border-radius: 18px;
-            border: none;
-            font-size: 1.3rem;
+            margin-bottom: 5px;
+            display: flex; align-items: center; gap: 12px;
+            color: var(--text-sec);
             font-weight: 500;
-            cursor: pointer;
-            background: var(--btn-num);
-            color: var(--text-main);
         }
-        button:hover { filter: brightness(1.1); transform: translateY(-2px); }
-        .op { background: var(--btn-op); color: var(--btn-accent); font-weight: 700; }
-        .sci-btn { font-size: 1rem; background: var(--btn-sci); color: var(--text-main); }
-        .equal { background: var(--btn-accent); color: white; grid-column: span 2; }
-        .clear { color: #ff3b30; }
 
-        /* SCI PANEL ANIMACE */
-        .sci-panel {
-            background: var(--btn-sci);
-            width: 0; opacity: 0; overflow: hidden;
-            border-radius: 30px;
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            align-self: stretch; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .nav-item:hover { background: var(--btn-hover); color: var(--text); }
+        .nav-item.active { background: var(--accent); color: white; }
+
+        /* MAIN CONTENT */
+        main { flex-grow: 1; margin-left: 280px; padding: 40px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+
+        .tool-section { display: none; animation: fadeIn 0.4s ease-out; }
+        .tool-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI ELEMENTS */
+        .card { background: var(--card); padding: 30px; border-radius: 24px; box-shadow: var(--shadow); max-width: 800px; }
+        .grid-tool { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        
+        input, select, textarea {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text); margin: 10px 0; font-size: 1rem;
         }
-        .sci-panel.open { width: 180px; opacity: 1; padding: 15px; margin-left: 15px; }
 
-        .copy-hint {
-            position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
-            background: var(--btn-accent); color: white; padding: 6px 12px;
-            border-radius: 10px; font-size: 0.8rem; opacity: 0; pointer-events: none; transition: 0.3s;
+        button.primary {
+            background: var(--accent); color: white; border: none; padding: 12px 24px;
+            border-radius: 12px; cursor: pointer; font-weight: 600; width: 100%;
         }
-        .copy-hint.show { opacity: 1; top: -10px; }
+        button.primary:hover { opacity: 0.9; transform: translateY(-2px); }
 
-        /* Mobilní verze */
-        @media (max-width: 800px) {
-            .app-container { flex-direction: column; align-items: center; padding-top: 60px; }
-            .history-panel { width: 350px; height: 180px; order: 3; }
-            .sci-panel.open { width: 350px; margin: 15px 0; order: 2; grid-template-columns: repeat(4, 1fr); }
+        /* SPECIFIC TOOLS STYLES (CALCULATOR REUSED) */
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .calc-btn { padding: 20px; border-radius: 15px; border: none; background: var(--btn-hover); color: var(--text); cursor: pointer; font-weight: 600; }
+        .calc-display { background: var(--bg); padding: 20px; border-radius: 15px; text-align: right; margin-bottom: 15px; font-size: 2rem; min-height: 80px; }
+
+        /* THEME TOGGLE */
+        .theme-btn {
+            background: var(--btn-hover); border: none; width: 40px; height: 40px;
+            border-radius: 50%; cursor: pointer; font-size: 1.2rem;
+        }
+
+        @media (max-width: 900px) {
+            nav { width: 80px; padding: 20px 10px; }
+            nav .logo span, nav .nav-item span { display: none; }
+            main { margin-left: 80px; padding: 20px; }
         }
     </style>
 </head>
 <body data-theme="dark">
 
-    <button class="theme-toggle" onclick="toggleTheme()" id="themeIcon">☀️</button>
+    <nav>
+        <div class="logo">🛠️ <span>ToolBox</span></div>
+        <div class="nav-item active" onclick="showTool('calc', this)"><span>🧮</span> <span>Kalkulačka</span></div>
+        <div class="nav-item" onclick="showTool('pass', this)"><span>🔐</span> <span>Generátor hesel</span></div>
+        <div class="nav-item" onclick="showTool('units', this)"><span>📏</span> <span>Převodník</span></div>
+        <div class="nav-item" onclick="showTool('text', this)"><span>✍️</span> <span>Text Tools</span></div>
+        <div class="nav-item" onclick="showTool('color', this)"><span>🎨</span> <span>Barvy</span></div>
+    </nav>
 
-    <div class="app-container">
-        <!-- Historie -->
-        <div class="history-panel">
-            <h3 style="color: var(--text-main);">Historie</h3>
-            <div class="history-list" id="history-list">
-                <!-- Zde se objeví historie -->
+    <main>
+        <header>
+            <h1 id="tool-title">Kalkulačka</h1>
+            <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+        </header>
+
+        <!-- KALKULAČKA -->
+        <section id="tool-calc" class="tool-section active">
+            <div class="card" style="max-width: 400px;">
+                <div class="calc-display" id="display">0</div>
+                <div class="calc-grid">
+                    <button class="calc-btn" onclick="calcClear()" style="color:#ff3b30">AC</button>
+                    <button class="calc-btn" onclick="calcInput('/')">÷</button>
+                    <button class="calc-btn" onclick="calcInput('*')">×</button>
+                    <button class="calc-btn" onclick="calcDel()">⌫</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="calcInput('9')">9</button>
+                    <button class="calc-btn" onclick="calcInput('-')">-</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn" onclick="calcInput('+')">+</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="calcInput('3')">3</button>
+                    <button class="calc-btn" style="background: var(--accent); color:white; grid-row: span 2;" onclick="calcFinal()">=</button>
+                    
+                    <button class="calc-btn" style="grid-column: span 2;" onclick="calcInput('0')">0</button>
+                    <button class="calc-btn" onclick="calcInput('.')">.</button>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Hlavní kalkulačka -->
-        <div class="calculator">
-            <div class="display" onclick="copyResult()">
-                <div class="copy-hint" id="copy-hint">Zkopírováno!</div>
-                <div id="display-history"></div>
-                <div id="display-main">0</div>
+        <!-- GENERÁTOR HESEL -->
+        <section id="tool-pass" class="tool-section">
+            <div class="card">
+                <h3>Vytvořit bezpečné heslo</h3>
+                <input type="text" id="pass-output" readonly placeholder="Klikněte na generovat" style="font-family: monospace; font-size: 1.2rem; text-align: center;">
+                <div style="margin: 20px 0;">
+                    <label>Délka: <span id="length-val">16</span></label>
+                    <input type="range" id="pass-length" min="8" max="50" value="16" oninput="document.getElementById('length-val').innerText=this.value">
+                </div>
+                <button class="primary" onclick="generatePass()">Generovat heslo</button>
             </div>
+        </section>
 
-            <div class="buttons-grid">
-                <button class="op clear" onclick="fullClear()">AC</button>
-                <button class="op" onclick="deleteLast()">⌫</button>
-                <button class="op" onclick="toggleSci()">Sci</button>
-                <button class="op" onclick="appendOp('/')">÷</button>
-
-                <button onclick="appendNum('7')">7</button>
-                <button onclick="appendNum('8')">8</button>
-                <button onclick="appendNum('9')">9</button>
-                <button class="op" onclick="appendOp('*')">×</button>
-
-                <button onclick="appendNum('4')">4</button>
-                <button onclick="appendNum('5')">5</button>
-                <button onclick="appendNum('6')">6</button>
-                <button class="op" onclick="appendOp('-')">−</button>
-
-                <button onclick="appendNum('1')">1</button>
-                <button onclick="appendNum('2')">2</button>
-                <button onclick="appendNum('3')">3</button>
-                <button class="op" onclick="appendOp('+')">+</button>
-
-                <button onclick="appendNum('0')">0</button>
-                <button onclick="appendNum('.')">.</button>
-                <button class="equal" onclick="calculate()">=</button>
+        <!-- PŘEVODNÍK JEDNOTEK -->
+        <section id="tool-units" class="tool-section">
+            <div class="card">
+                <div class="grid-tool">
+                    <div>
+                        <label>Z (Kilometry)</label>
+                        <input type="number" id="unit-from-val" value="1" oninput="convertUnits()">
+                    </div>
+                    <div>
+                        <label>Na (Míle)</label>
+                        <input type="number" id="unit-to-val" readonly>
+                    </div>
+                </div>
+                <p style="margin-top: 20px; color: var(--text-sec);">Jednoduchý převod km na míle (a obráceně).</p>
             </div>
-        </div>
+        </section>
 
-        <!-- Vědecký panel -->
-        <div class="sci-panel" id="sci-panel">
-            <button class="sci-btn" onclick="sciFunc('sin')">sin</button>
-            <button class="sci-btn" onclick="sciFunc('cos')">cos</button>
-            <button class="sci-btn" onclick="sciFunc('tan')">tan</button>
-            <button class="sci-btn" onclick="sciFunc('log')">log</button>
-            <button class="sci-btn" onclick="appendNum(Math.PI.toFixed(5))">π</button>
-            <button class="sci-btn" onclick="sciFunc('sqrt')">√x</button>
-            <button class="sci-btn" onclick="sciFunc('pow2')">x²</button>
-            <button class="sci-btn" onclick="sciFunc('fact')">n!</button>
-        </div>
-    </div>
+        <!-- TEXT TOOLS -->
+        <section id="tool-text" class="tool-section">
+            <div class="card">
+                <textarea id="text-input" rows="8" placeholder="Vložte text..." oninput="analyzeText()"></textarea>
+                <div class="grid-tool" style="margin-top: 10px;">
+                    <button class="calc-btn" onclick="textCase('up')">VELKÁ</button>
+                    <button class="calc-btn" onclick="textCase('low')">malá</button>
+                    <button class="calc-btn" onclick="textCase('clean')">Bez diakritiky</button>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 20px;">
+                    <span>Znaky: <strong id="count-char">0</strong></span>
+                    <span>Slova: <strong id="count-word">0</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLOR TOOLS -->
+        <section id="tool-color" class="tool-section">
+            <div class="card" style="text-align: center;">
+                <input type="color" id="color-picker" value="#0071e3" style="height: 150px; cursor: pointer; padding: 5px;" oninput="updateColor(this.value)">
+                <h2 id="color-hex" style="margin: 15px 0;">#0071E3</h2>
+                <button class="primary" onclick="copyColor()">Kopírovat HEX</button>
+            </div>
+        </section>
+    </main>
 
     <script>
-        let current = '0';
-        let prev = '';
-        let operator = null;
-        let shouldReset = false;
-        let history = JSON.parse(localStorage.getItem('calc_hist')) || [];
-
-        const dMain = document.getElementById('display-main');
-        const dHist = document.getElementById('display-history');
-
-        function format(val) {
-            if (val === "Chyba") return val;
-            let [int, dec] = val.toString().split(".");
-            int = int.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            return dec ? `${int}.${dec}` : int;
-        }
-
-        function update() {
-            dMain.innerText = format(current);
-            dMain.style.fontSize = current.length > 10 ? '1.8rem' : '2.8rem';
-        }
-
-        function appendNum(n) {
-            if (current === '0' || shouldReset) { current = n; shouldReset = false; }
-            else { if (n === '.' && current.includes('.')) return; current += n; }
-            update();
-        }
-
-        function appendOp(op) {
-            if (operator) calculate();
-            prev = current;
-            operator = op;
-            dHist.innerText = `${format(prev)} ${op}`;
-            shouldReset = true;
-        }
-
-        function calculate() {
-            if (!operator || shouldReset) return;
-            let result;
-            const p = parseFloat(prev);
-            const c = parseFloat(current);
+        // NAVIGATION LOGIC
+        function showTool(toolId, btn) {
+            document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             
-            switch(operator) {
-                case '+': result = p + c; break;
-                case '-': result = p - c; break;
-                case '*': result = p * c; break;
-                case '/': result = c === 0 ? "Chyba" : p / c; break;
-            }
-            
-            if (typeof result === 'number') result = Math.round(result * 1000000) / 1000000;
-            
-            addHist(`${prev} ${operator} ${current}`, result);
-            current = result.toString();
-            operator = null;
-            shouldReset = true;
-            dHist.innerText = '';
-            update();
-        }
-
-        function sciFunc(f) {
-            let v = parseFloat(current);
-            let r = 0;
-            if (f === 'sin') r = Math.sin(v * Math.PI / 180);
-            if (f === 'cos') r = Math.cos(v * Math.PI / 180);
-            if (f === 'tan') r = Math.tan(v * Math.PI / 180);
-            if (f === 'log') r = Math.log10(v);
-            if (f === 'sqrt') r = Math.sqrt(v);
-            if (f === 'pow2') r = v * v;
-            if (f === 'fact') { r = 1; for(let i=2; i<=v; i++) r *= i; }
-            
-            current = (Math.round(r * 1000000) / 1000000).toString();
-            update();
-        }
-
-        function fullClear() { current = '0'; prev = ''; operator = null; dHist.innerText = ''; update(); }
-        
-        function deleteLast() {
-            current = current.length > 1 ? current.slice(0, -1) : '0';
-            update();
-        }
-
-        function toggleSci() { document.getElementById('sci-panel').classList.toggle('open'); }
-
-        function copyResult() {
-            navigator.clipboard.writeText(current);
-            const hint = document.getElementById('copy-hint');
-            hint.classList.add('show');
-            setTimeout(() => hint.classList.remove('show'), 2000);
-        }
-
-        function addHist(ex, rs) {
-            if (rs === "Chyba") return;
-            history.unshift({ex, rs});
-            if (history.length > 10) history.pop();
-            localStorage.setItem('calc_hist', JSON.stringify(history));
-            renderHist();
-        }
-
-        function renderHist() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = history.map(i => `
-                <div class="history-item" onclick="current='${i.rs}'; update();">
-                    <span class="history-expr">${i.ex} =</span>
-                    <span class="history-val">${format(i.rs)}</span>
-                </div>
-            `).join('');
+            document.getElementById('tool-' + toolId).classList.add('active');
+            btn.classList.add('active');
+            document.getElementById('tool-title').innerText = btn.innerText;
         }
 
         function toggleTheme() {
             const body = document.body;
             const isDark = body.getAttribute('data-theme') === 'dark';
             body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            document.getElementById('themeIcon').innerText = isDark ? '🌙' : '☀️';
+            document.querySelector('.theme-btn').innerText = isDark ? '🌙' : '☀️';
         }
 
-        renderHist();
-        update();
+        // --- TOOL: CALCULATOR ---
+        let calcVal = "0";
+        function calcInput(val) {
+            if(calcVal === "0") calcVal = val;
+            else calcVal += val;
+            document.getElementById('display').innerText = calcVal;
+        }
+        function calcClear() { calcVal = "0"; document.getElementById('display').innerText = calcVal; }
+        function calcDel() { calcVal = calcVal.slice(0,-1) || "0"; document.getElementById('display').innerText = calcVal; }
+        function calcFinal() {
+            try { calcVal = eval(calcVal).toString(); } 
+            catch { calcVal = "Chyba"; }
+            document.getElementById('display').innerText = calcVal;
+        }
+
+        // --- TOOL: PASS GENERATOR ---
+        function generatePass() {
+            const length = document.getElementById('pass-length').value;
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+            let retVal = "";
+            for (let i = 0; i < length; ++i) {
+                retVal += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            document.getElementById('pass-output').value = retVal;
+        }
+
+        // --- TOOL: UNIT CONVERTER ---
+        function convertUnits() {
+            const from = document.getElementById('unit-from-val').value;
+            document.getElementById('unit-to-val').value = (from * 0.621371).toFixed(2);
+        }
+
+        // --- TOOL: TEXT TOOLS ---
+        function analyzeText() {
+            const txt = document.getElementById('text-input').value;
+            document.getElementById('count-char').innerText = txt.length;
+            document.getElementById('count-word').innerText = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+        }
+        function textCase(mode) {
+            let area = document.getElementById('text-input');
+            if(mode === 'up') area.value = area.value.toUpperCase();
+            if(mode === 'low') area.value = area.value.toLowerCase();
+            if(mode === 'clean') area.value = area.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            analyzeText();
+        }
+
+        // --- TOOL: COLORS ---
+        function updateColor(val) {
+            document.getElementById('color-hex').innerText = val.toUpperCase();
+        }
+        function copyColor() {
+            navigator.clipboard.writeText(document.getElementById('color-hex').innerText);
+            alert('HEX barva zkopírována!');
+        }
     </script>
 </body>
 </html>
